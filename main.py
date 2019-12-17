@@ -72,6 +72,9 @@ def clean_tmp_html():
 
 if __name__ == "__main__":
 
+    if not os.path.exists(FILE_PATH):
+        os.mkdir(FILE_PATH)
+
     server_config = configparser.ConfigParser()
     server_config.read('config/cnf', encoding='utf-8')
 
