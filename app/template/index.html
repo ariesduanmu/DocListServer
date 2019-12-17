@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>HELLO WORLD</title>
+    <link rel="stylesheet" href="{{ static_url('plugin/layui/css/layui.css') }}">
+    <link rel="stylesheet" href="{{ static_url('css/mdstyle.css') }}">
+    <style type="text/css">
+        body{margin: 0px;padding: 0px;}
+        #fileTree{ }
+        #mainFrame{overflow-y: scroll;height: 100%}
+        .right_tree{width: 65%;position: fixed;right: 0px;top: 0px;bottom: 0px;}
+        .left_tree{width: 29%;overflow-x: scroll;position: fixed;left: 0px;top: 0px;bottom: 0px;}
+    </style>
+
+</head>
+<body>
+    <div class="left_tree">
+        <ul id="fileTree" style="padding-left: 0px;margin-top: 5px;"></ul>
+    </div>
+
+    <div class="right_tree" >
+        <div id="mainFrame" >
+            <h2>HELLO WORLD</h2>
+       </div>
+    </div>
+
+    <script src="{{ static_url('plugin/layui/layui.js') }}"></script>
+    <script src="{{ static_url('js/browser.js') }}"></script>
+    <script>
+        var browserInfo = new browserInfo();
+        if(browserInfo.browser=='IE'){
+            alert('不支持IE内核浏览器,为了更好的用户体验建议您更换浏览器')
+        }
+        var sjWidth=0;
+        layui.use('atree', function() {
+            var $ =layui.$;
+
+            function initnodes(nodes, file){
+
+                var last_nodes = [];
+                var last_nodes_childrenList = [];
+
+                for(var i=nodes.length-1;i>=0;i--)
+                {
+                    var render_node = nodes[i];
+                    var nodes_childrenList = [];
+                    console.log(render_node)
+                    for(var j=0;j<render_node[1].length;j++)
+                    {
+                        var n = render_node[1][j];
+                        var node_obj = {
+                            name: n[1],
+                            id: 1,
+                            alias: n[0]
+                        }
+                        
+                        if(last_nodes.length>0 && n[1] == last_nodes[0] && last_nodes_childrenList.length > 0)
+                        {
+                            node_obj['children'] = last_nodes_childrenList;
+                        }
+                        nodes_childrenList.push(node_obj);
+                    }
+
+                    last_nodes = render_node;
+                    last_nodes_childrenList = nodes_childrenList;
+                }
+
+                console.log(last_nodes_childrenList);
+                
+                var nodeTrees={
+                        elem: '#fileTree',
+                        skin: 'as',
+                        spreadAll:true,
+                        props:{
+                                addBtnLabel:'',
+                                deleteBtnLabel:'',
+                                name: 'name',
+                                id: 'id',
+                                children:'children',
+                                checkbox:'checkbox',
+                                spread:'spread'
+                        },
+                        click: function(item) { //点击节点回调
+
+                            location.href = "?node="+item.alias;
+                        },
+                        nodes: last_nodes_childrenList
+                    };
+                    $("#fileTree").empty();
+                    var tree = layui.atree(nodeTrees);
+
+                    $('.layui-atree-node').each(function(item){
+                        if($(this).find('cite').text().indexOf('.')==-1 && $(this).find('i').length==0){
+                            $(this).prepend('<i class="layui-icon layui-atree-spread"></i>')
+                        }
+                    });
+
+                    if(file.length>0){
+                        console.log(file)
+                        $("#mainFrame").load('/file/'+file)
+                    }
+            }
+
+            initnodes(JSON.parse({% raw json_encode(nodes) %}), '{{ file }}');
+            
+        });
+    </script>
+</body>
+</html>

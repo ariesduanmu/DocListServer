@@ -1,0 +1,4 @@
+[default]
+port = 8001
+searchpath = test
+logfile = docserver.log
